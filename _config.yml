@@ -1,5 +1,5 @@
-title: Yongjin's git blog
-author: Choi Yongjin
+title: Yongjin's Git blog
+author: GitHub User
 email: dydwls8445@gmail.com
 description: > # this means to ignore newlines until "show_exerpts:"
   Write an awesome description for your new site here. You can edit this
@@ -12,8 +12,8 @@ show_excerpts: true # set to true to show excerpts on the homepage
 sass:
   sass_dir: _sass
 plainwhite:
-  name: Yongjin Choi # Adam Denisov
-  tagline: AI researcher
+  name: Yongjin Colin Choi
+  tagline: AI resercher, Growth hacker
   date_format: "%b %-d, %Y"
   sitemap: true # set to true to generate sitemap.xml content
   search: true # set to true to enable searchbar
@@ -54,7 +54,6 @@ plainwhite:
 
 # Build settings
 theme: plainwhite
-remote_theme: samarsault/plainwhite-jekyll
 
 plugins:
   - jekyll-seo-tag
