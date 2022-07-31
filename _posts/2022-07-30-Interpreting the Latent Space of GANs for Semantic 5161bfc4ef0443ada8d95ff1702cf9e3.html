@@ -1,0 +1,670 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Interpreting the Latent Space of GANs for Semantic Face Editing</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="181dd5f7-7a54-4e13-aee3-b041fed6b24b" class="page sans"><header><h1 class="page-title">Interpreting the Latent Space of GANs for Semantic Face Editing</h1><table class="properties"><tbody><tr class="property-row property-row-select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesSelect"><path d="M7,13 C10.31348,13 13,10.31371 13,7 C13,3.68629 10.31348,1 7,1 C3.68652,1 1,3.68629 1,7 C1,10.31371 3.68652,13 7,13 Z M3.75098,5.32278 C3.64893,5.19142 3.74268,5 3.90869,5 L10.09131,5 C10.25732,5 10.35107,5.19142 10.24902,5.32278 L7.15771,9.29703 C7.07764,9.39998 6.92236,9.39998 6.84229,9.29703 L3.75098,5.32278 Z"></path></svg></span>Status</th><td><span class="selected-value select-value-color-blue">Finished</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesMultipleSelect"><path d="M4,3 C4,2.447715 4.447715,2 5,2 L12,2 C12.5523,2 13,2.447716 13,3 C13,3.55228 12.5523,4 12,4 L5,4 C4.447715,4 4,3.55228 4,3 Z M4,7 C4,6.447715 4.447715,6 5,6 L12,6 C12.5523,6 13,6.447716 13,7 C13,7.55228 12.5523,8 12,8 L5,8 C4.447715,8 4,7.55228 4,7 Z M4,11 C4,10.447715 4.447715,10 5,10 L12,10 C12.5523,10 13,10.447716 13,11 C13,11.55228 12.5523,12 12,12 L5,12 C4.447715,12 4,11.55228 4,11 Z M2,4 C1.44771525,4 1,3.55228475 1,3 C1,2.44771525 1.44771525,2 2,2 C2.55228475,2 3,2.44771525 3,3 C3,3.55228475 2.55228475,4 2,4 Z M2,8 C1.44771525,8 1,7.55228475 1,7 C1,6.44771525 1.44771525,6 2,6 C2.55228475,6 3,6.44771525 3,7 C3,7.55228475 2.55228475,8 2,8 Z M2,12 C1.44771525,12 1,11.5522847 1,11 C1,10.4477153 1.44771525,10 2,10 C2.55228475,10 3,10.4477153 3,11 C3,11.5522847 2.55228475,12 2,12 Z"></path></svg></span>Conference/Journal</th><td><span class="selected-value select-value-color-red">CVPR</span></td></tr><tr class="property-row property-row-select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesSelect"><path d="M7,13 C10.31348,13 13,10.31371 13,7 C13,3.68629 10.31348,1 7,1 C3.68652,1 1,3.68629 1,7 C1,10.31371 3.68652,13 7,13 Z M3.75098,5.32278 C3.64893,5.19142 3.74268,5 3.90869,5 L10.09131,5 C10.25732,5 10.35107,5.19142 10.24902,5.32278 L7.15771,9.29703 C7.07764,9.39998 6.92236,9.39998 6.84229,9.29703 L3.75098,5.32278 Z"></path></svg></span>Publishing/Release Date</th><td><span class="selected-value select-value-color-brown">2020</span></td></tr><tr class="property-row property-row-url"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesUrl"><path d="M3.73333,3.86667 L7.46667,3.86667 C8.49613,3.86667 9.33333,4.70387 9.33333,5.73333 C9.33333,6.7628 8.49613,7.6 7.46667,7.6 L6.53333,7.6 C6.01813,7.6 5.6,8.0186 5.6,8.53333 C5.6,9.04807 6.01813,9.46667 6.53333,9.46667 L7.46667,9.46667 C9.5284,9.46667 11.2,7.79507 11.2,5.73333 C11.2,3.6716 9.5284,2 7.46667,2 L3.73333,2 C1.6716,2 0,3.6716 0,5.73333 C0,7.124 0.762067,8.33453 1.88953,8.97713 C1.87553,8.83107 1.86667,8.6836 1.86667,8.53333 C1.86667,7.92013 1.98753,7.33447 2.2036,6.7978 C1.99267,6.4954 1.86667,6.12953 1.86667,5.73333 C1.86667,4.70387 2.70387,3.86667 3.73333,3.86667 Z M12.1095,5.28907 C12.1231,5.4356 12.1333,5.58307 12.1333,5.73333 C12.1333,6.34607 12.0101,6.9294 11.7931,7.46513 C12.0059,7.768 12.1333,8.13573 12.1333,8.53333 C12.1333,9.5628 11.2961,10.4 10.2667,10.4 L6.53333,10.4 C5.50387,10.4 4.66667,9.5628 4.66667,8.53333 C4.66667,7.50387 5.50387,6.66667 6.53333,6.66667 L7.46667,6.66667 C7.98187,6.66667 8.4,6.24807 8.4,5.73333 C8.4,5.2186 7.98187,4.8 7.46667,4.8 L6.53333,4.8 C4.4716,4.8 2.8,6.4716 2.8,8.53333 C2.8,10.59507 4.4716,12.2667 6.53333,12.2667 L10.2667,12.2667 C12.3284,12.2667 14,10.59507 14,8.53333 C14,7.14267 13.2375,5.93167 12.1095,5.28907 Z"></path></svg></span>Link</th><td><a href="https://arxiv.org/abs/1907.10786" class="url-value">https://arxiv.org/abs/1907.10786</a></td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesText"><path d="M7,4.56818 C7,4.29204 6.77614,4.06818 6.5,4.06818 L0.5,4.06818 C0.223858,4.06818 0,4.29204 0,4.56818 L0,5.61364 C0,5.88978 0.223858,6.11364 0.5,6.11364 L6.5,6.11364 C6.77614,6.11364 7,5.88978 7,5.61364 L7,4.56818 Z M0.5,1 C0.223858,1 0,1.223858 0,1.5 L0,2.54545 C0,2.8216 0.223858,3.04545 0.5,3.04545 L12.5,3.04545 C12.7761,3.04545 13,2.8216 13,2.54545 L13,1.5 C13,1.223858 12.7761,1 12.5,1 L0.5,1 Z M0,8.68182 C0,8.95796 0.223858,9.18182 0.5,9.18182 L11.5,9.18182 C11.7761,9.18182 12,8.95796 12,8.68182 L12,7.63636 C12,7.36022 11.7761,7.13636 11.5,7.13636 L0.5,7.13636 C0.223858,7.13636 0,7.36022 0,7.63636 L0,8.68182 Z M0,11.75 C0,12.0261 0.223858,12.25 0.5,12.25 L9.5,12.25 C9.77614,12.25 10,12.0261 10,11.75 L10,10.70455 C10,10.4284 9.77614,10.20455 9.5,10.20455 L0.5,10.20455 C0.223858,10.20455 0,10.4284 0,10.70455 L0,11.75 Z"></path></svg></span>Summary</th><td>interpreting the Latent space of GANs for Semantic Face Editing</td></tr><tr class="property-row property-row-select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesSelect"><path d="M7,13 C10.31348,13 13,10.31371 13,7 C13,3.68629 10.31348,1 7,1 C3.68652,1 1,3.68629 1,7 C1,10.31371 3.68652,13 7,13 Z M3.75098,5.32278 C3.64893,5.19142 3.74268,5 3.90869,5 L10.09131,5 C10.25732,5 10.35107,5.19142 10.24902,5.32278 L7.15771,9.29703 C7.07764,9.39998 6.92236,9.39998 6.84229,9.29703 L3.75098,5.32278 Z"></path></svg></span>Score /5</th><td><span class="selected-value select-value-color-default">⭐️⭐️⭐️</span></td></tr><tr class="property-row property-row-select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesSelect"><path d="M7,13 C10.31348,13 13,10.31371 13,7 C13,3.68629 10.31348,1 7,1 C3.68652,1 1,3.68629 1,7 C1,10.31371 3.68652,13 7,13 Z M3.75098,5.32278 C3.64893,5.19142 3.74268,5 3.90869,5 L10.09131,5 C10.25732,5 10.35107,5.19142 10.24902,5.32278 L7.15771,9.29703 C7.07764,9.39998 6.92236,9.39998 6.84229,9.29703 L3.75098,5.32278 Z"></path></svg></span>Type</th><td><span class="selected-value select-value-color-purple">GAN</span></td></tr><tr class="property-row property-row-file"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesFile"><path d="M5.94578,14 C4.62416,14 3.38248,13.4963 2.44892,12.585 C1.514641,11.6736 1,10.4639 1,9.17405 C1.00086108,7.88562 1.514641,6.67434 2.44892,5.76378 L7.45612,0.985988 C8.80142,-0.327216 11.1777,-0.332396 12.5354,0.992848 C13.9369,2.36163 13.9369,4.58722 12.5354,5.95418 L8.03046,10.2414 C7.16278,11.0877 5.73682,11.0894 4.86024,10.2345 C3.98394,9.37789 3.98394,7.98769 4.86024,7.1327 L6.60422,5.4317 L7.87576,6.67196 L6.13177,8.37297 C6.01668,8.48539 6.00003,8.61545 6.00003,8.68335 C6.00003,8.75083 6.01668,8.88103 6.13177,8.99429 C6.36197,9.21689 6.53749,9.21689 6.76768,8.99429 L11.2707,4.70622 C11.9645,4.03016 11.9645,2.91757 11.2638,2.23311 C10.5843,1.57007 9.40045,1.57007 8.72077,2.23311 L3.71342,7.0109 C3.12602,7.58406 2.79837,8.35435 2.79837,9.17405 C2.79837,9.99459 3.12602,10.7654 3.72045,11.3446 C4.90947,12.5062 6.98195,12.5062 8.17096,11.3446 L10.41911,9.15165 L11.6906,10.3919 L9.4425,12.585 C8.50808,13.4963 7.2664,14 5.94578,14 Z"></path></svg></span>reference</th><td><span style="margin-right:6px"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Interpreting_the_Latent_Space_of_GANs_for_Semantic_Face_Editing.pdf">Interpreting the Latent Space of GANs for Semantic Face Editing.pdf</a></span></td></tr></tbody></table></header><div class="page-body"><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="6ce0e668-17d4-421f-9980-3a7d78af8d78"><div style="font-size:1.5em"><span class="icon">📱</span></div><div style="width:100%">GAN의 Latent Space Understanding에 관한 논문임. 잘 Training된 generative model의 경우 latent code를 linear transformation을 거치면 disentangled representation을 확인할 수 있고, facial attributes에 대해서 각 attributes들을 잘 decouple해서 정교하게 조절하는 방법을 보여줌.</div></figure><h1 id="2a355fa7-82d8-46eb-b396-e28643cb1b3a" class="">1. Main Contribution </h1><ol type="1" id="3eac6ed3-afe6-4f0d-83ef-e7265b7c3990" class="numbered-list" start="1"><li>PGGAN, StyleGan 등 기존 GAN의 latent space에서 구체적인 Attribute들이  Linear transformation을 통해서 Deisentagle 되는것을 확인함. </li></ol><ol type="1" id="aac49d66-6c44-4aa8-8a4a-e4e0d2a7221a" class="numbered-list" start="2"><li>fixed Pre-trained GAN model에서 latent code만을 변경하여 Semantic face editing을 수행하는 InterFaceGAN을 선보임.</li></ol><ol type="1" id="907471ae-e325-49ba-8715-8f745d7700e8" class="numbered-list" start="3"><li> Real image의 latend code를 GAN inversion 혹은 encoder-involved model을 통해서 뽑아내고 interFaceGAN을 이용해 Editing함.</li></ol><h1 id="ffd4df3f-f235-43b3-97dc-cc54e454f109" class="">2. Framework of InterFaceGAN</h1><ul id="b9d99692-e970-48b6-ba4b-eb51ca11d775" class="bulleted-list"><li style="list-style-type:disc">Well-trained GAN model의 latent space에서 나타나는 semantic attributes에 대한 엄밀한 분석진행.</li></ul><ul id="f5e9cdf2-1456-4cc9-ba2d-598adb5431df" class="bulleted-list"><li style="list-style-type:disc">latent code의 semantics를 이용하여 facial attribute  editing을 수행하는 manipulation pipeline을 구성함.</li></ul><h2 id="b66372ad-ddaf-4242-aabc-c8ab03c93fc3" class="">2-1. Semantics in the Latent Space</h2><ul id="53d19248-279d-4b84-8182-779b0d8dc601" class="bulleted-list"><li style="list-style-type:disc"> Generator <p id="23d2a688-626f-44f3-9229-51099a2407d7" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo>:</mo><mi>Z</mi><mo>→</mo><mi>X</mi></mrow><annotation encoding="application/x-tex">g : Z → X </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span></span></span></span></span><span>﻿</span></span></p><p id="57f2c613-99a6-430a-a797-99097f70bf75" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mo>⊆</mo><msup><mi>R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">Z ⊆ R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.13597em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⊆</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.849108em;vertical-align:0em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.849108em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> , Gaussian distribution <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><msub><mi>I</mi><mi>d</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">N (0, I_d) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span><span>﻿</span></span>를 따름.</p><p id="0409712f-437e-4551-8f87-91928a1e7636" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi></mrow><annotation encoding="application/x-tex">X </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span></span></span></span></span><span>﻿</span></span>는 image space를 나타내고, 각 <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">x</span></span></span></span></span><span>﻿</span></span>는 특정 semantic information을 가짐(성별, 나이, 안경유무 등)</p></li></ul><ul id="9358df72-01ae-4c8b-aa44-6929994c6acc" class="bulleted-list"><li style="list-style-type:disc">Semantic scoring function<p id="3a62f215-48eb-489a-8e05-eca315642a41" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>S</mi></msub><mo>:</mo><mi>X</mi><mo>→</mo><mi>S</mi></mrow><annotation encoding="application/x-tex"> f_S : X → S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span></span><span>﻿</span></span></p><p id="cd569b68-f3e3-4492-827d-41ef411376e0" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo>⊆</mo><msup><mi>R</mi><mi>m</mi></msup></mrow><annotation encoding="application/x-tex">S ⊆ R^m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.13597em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⊆</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> ,  <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">m</span></span></span></span></span><span>﻿</span></span> 개의 semantics에 대한 semantics space를 나타냄.</p><p id="6612f36b-14f4-4a56-ac51-1461c4e50551" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>=</mo><msub><mi>f</mi><mi>S</mi></msub><mo stretchy="false">(</mo><mi>g</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">s = f_S(g(z))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mclose">))</span></span></span></span></span><span>﻿</span></span></p></li></ul><ul id="9f95de10-fbb4-4051-81b0-567edb24788d" class="bulleted-list"><li style="list-style-type:disc"><strong>Property 1. </strong><p id="c42610d5-01ad-4dc6-91ee-9cefcbd7e506" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>∈</mo><msup><mi>R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex"> n ∈ R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.849108em;vertical-align:0em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.849108em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span>,  <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo>∈</mo><msup><mi>R</mi><mi>d</mi></msup><mo>:</mo><msup><mi>n</mi><mi>T</mi></msup><mi>z</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">{z ∈R^d : n^T z = 0} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.888208em;vertical-align:-0.0391em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.849108em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord">0</span></span></span></span></span></span><span>﻿</span></span>은 hyperplane <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.849108em;vertical-align:0em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.849108em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span>을 정의하고, n은 normal vector임. <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>n</mi><mi>T</mi></msup><mi>z</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex"> n^T z &gt; 0 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.880431em;vertical-align:-0.0391em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span></span></span></span></span><span>﻿</span></span> 을 만족하는 모든 z는 hyperplane의 같은 면에 위치함.</p><figure id="5161bfc4-ef04-43ad-a8d9-5ff1702cf9e3" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled.png"><img style="width:499px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled.png"/></a></figure><figure id="8638cd33-6689-4e6e-9012-78e0ced2e99f" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%201.png"><img style="width:612px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%201.png"/></a></figure></li></ul><ul id="75693a9d-d22b-42bf-b7c7-12f14feced2f" class="bulleted-list"><li style="list-style-type:disc"><strong>Property 2.</strong><figure id="939c4b6c-3481-4e42-9fa9-565342894fc8" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%202.png"><img style="width:495px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%202.png"/></a></figure><p id="c606ec5c-c2a1-4bd1-a16c-0a3a39762aee" class="">→ random sample z는 hyperplane의 근처에 위치할 것임. </p></li></ul><h3 id="4ffd9b75-b1d3-4ef1-9b55-67d776bf96db" class="">Single Semantic</h3><figure id="033fc5d4-b5dc-41db-8590-a008df40fdb7" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%203.png"><img style="width:321px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%203.png"/></a></figure><ul id="14253a56-789c-415f-9669-f73473b464eb" class="bulleted-list"><li style="list-style-type:disc">위 (1) 식은 부호가 존재하는 distance의 개념임.</li></ul><ul id="54666de8-9b20-4993-960a-7b5b36593ffb" class="bulleted-list"><li style="list-style-type:disc">z가 hyperplane을 지나서 n에 가까워질수록 semantic score가 해당 방향으로 변함.</li></ul><ul id="fb6f956b-eeef-49aa-8244-20dee8dc0980" class="bulleted-list"><li style="list-style-type:disc">z가 hyperplane의 반대방향으로 가면 -로 바뀌고, semantic attribute는 reverse됨.</li></ul><figure id="e0bde2ec-8b42-414d-95ec-9635ef193121" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%204.png"><img style="width:335px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%204.png"/></a></figure><ul id="98940544-407b-490b-80d8-4147192bda01" class="bulleted-list"><li style="list-style-type:disc">(2)에서 λ는 양수이고, 이는 semantic score와 distance가 linearly dependent 함을 의미함.  </li></ul><h3 id="161bdf8b-fcc9-4d13-a654-06d13f5ce894" class="">Multiple Semantics</h3><ul id="566787e7-8202-455a-8000-6123071dccf4" class="bulleted-list"><li style="list-style-type:disc">m개의 different semantics가 있다고 가정함.</li></ul><figure id="e79a16d5-ca63-4abd-8565-e4470c6fcb8d" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%205.png"><img style="width:355px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%205.png"/></a></figure><ul id="5bb16297-dfbf-47ed-a3f5-8e0971ed3e5c" class="bulleted-list"><li style="list-style-type:disc">Λ = diag(λ1, . . . , λm)  (mxm)</li></ul><ul id="2c162161-a29f-4af0-b4cd-bb37a1abbfde" class="bulleted-list"><li style="list-style-type:disc">N = [n1,...,nm] (dxm) </li></ul><ul id="1af52791-76da-46c2-b369-0a53555383f9" class="bulleted-list"><li style="list-style-type:disc">z → (dx1), ~<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><msub><mi>I</mi><mi>d</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">N (0, I_d)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span><span>﻿</span></span></li></ul><ul id="f6141f14-e8f0-48f6-a9b8-825566b8f96d" class="bulleted-list"><li style="list-style-type:disc">s → (mx1)</li></ul><figure id="70a737d2-e094-419c-a842-a129e378130c" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%206.png"><img style="width:444px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%206.png"/></a></figure><p id="b0a59fbd-3b5a-4604-a95c-31cf226d9b95" class="block-color-yellow_background">→ <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>∼</mo><mi>N</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mi mathvariant="normal">Σ</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">s ∼ N (0, Σs)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">Σ</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span></span><span>﻿</span></span></p><p id="20ff7bcf-521b-40b6-904a-923d7a797824" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Σ</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">Σs</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">Σ</span><span class="mord mathnormal">s</span></span></span></span></span><span>﻿</span></span> 가 diagonal matrix라면 s의 각 요소들은 disentangle함.<div class="indented"><p id="ed5ae562-dceb-48f0-b481-f7e585eca1b7" class="">→ 그러기 위해서는 {n1, ..., nm}이 서로 orthogonal이어야함.</p><p id="abe7bad1-4dca-4c30-acbd-75b73da80ac1" class="">→ orthogonal이 아니라면 m의 각 요소들이 correlate되어있는 것.</p><p id="ed222a92-0b9f-4357-aae1-19c1a4109149" class="">→ <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>n</mi><mi>i</mi><mi>T</mi></msubsup><msub><mi>n</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex"> n^T_i n_j </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1274389999999999em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-2.441336em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.258664em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span>를 통해 entanglement를 측정가능</p></div></p><h2 id="f788df1f-bd74-4ce1-a94f-4b2b3d641bb3" class="">2-2. Manipulation in the Latent Space</h2><h3 id="152a0a8a-d41e-4607-a2ec-6b9394dc7d49" class="">Single Attribute Manipulation</h3><figure id="87ae88d6-c4ef-4b4b-b619-0c0f5e42740d" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%207.png"><img style="width:128px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%207.png"/></a></figure><ul id="3188c21f-07fd-4f7e-8f17-da490d652c3b" class="bulleted-list"><li style="list-style-type:disc"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>g</mi><mo stretchy="false">(</mo><msub><mi>z</mi><mi>e</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><mi>g</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>+</mo><mi>λ</mi><mi>α</mi></mrow><annotation encoding="application/x-tex"> f(g(z _ e )) = f(g(z)) + λα </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.04398em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">e</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">))</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mclose">))</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal">λ</span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span></span><span>﻿</span></span>, alpha가 양수일 경우 semantic을 더 positive하게 만들것이고, 음수일 경우 더 negative하게 만듦.</li></ul><h3 id="b3fb6bff-002a-4167-9f10-53170c13d537" class="">Conditional Manipulation</h3><ul id="2824cc88-e446-4034-b06c-bcd96b4a3e02" class="bulleted-list"><li style="list-style-type:disc">각 n들이 서로 correlate되어있을 경우, 한 Semantic만 조작하는 것이 쉽지 않기 때문에, conditional manipulation을 가해서 <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>N</mi><mi>T</mi></msup><mi>N</mi></mrow><annotation encoding="application/x-tex">N^T N </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8413309999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span></span><span>﻿</span></span>을 diagonal하게 만듦.<figure id="99cb2a2b-97f7-4a82-bdfc-26a5bb598db0" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%208.png"><img style="width:510px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%208.png"/></a></figure></li></ul><ul id="c0c6dc43-9153-434f-9c5e-87713ebcb830" class="bulleted-list"><li style="list-style-type:disc">각각 n1, n2의 normal을 가진 두 hyperplane이 있을때 attribute2에 영향 받지않고 attribute1만 바꿔주기 위해서는 <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mn>1</mn><mtext>−</mtext><mo stretchy="false">(</mo><msubsup><mi>n</mi><mn>1</mn><mi>T</mi></msubsup><msub><mi>n</mi><mn>2</mn></msub><mo stretchy="false">)</mo><msub><mi>n</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">n1 − (n^T_1 n_2)n_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0913309999999998em;vertical-align:-0.25em;"></span><span class="mord mathnormal">n</span><span class="mord">1−</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-2.4518920000000004em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24810799999999997em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span>방향으로 sample을 움직임.</li></ul><ul id="a8cb5c80-afad-4466-8bb2-0c6734e3f81e" class="bulleted-list"><li style="list-style-type:disc">2개 이상이 correlation되어있을땐 primal direction부터 correlate된 모든 것들을 재구성함.</li></ul><h3 id="8c40b71b-fd7a-4f1f-bba1-0fe943d08d20" class="">Real Image Manipulation</h3><ul id="6c828912-48f3-4e91-ada8-63f9ec7bd502" class="bulleted-list"><li style="list-style-type:disc">실제 이미지로부터 latent code를 구하기 위해서 reconstruction loss를 직접적으로 optimize하는 방법이 있고, image를 다시 latent space로 mapping해주는 encoder를 학습시키는 방법이 있음. </li></ul><h1 id="5bd024fa-8c86-4557-a7e3-264cdc6fc279" class="">3. Experiments</h1><h2 id="def5806a-d43e-4066-88f3-174a5bf37be1" class="">3-1. Latent Space Separation</h2><ul id="ecb5b8f6-411a-46be-9fff-90d522b193e5" class="bulleted-list"><li style="list-style-type:disc">실제로 5개의 feature (m=5)에 대해서 labeling을 하고, latent space에서 svm으로 해당 feature를 만들어내는 latent code들을 separate했을 때 높은 성능으로 구분되는 것을 확인함.<figure id="6a107670-8405-4914-8c92-0f5b1420fe50" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%209.png"><img style="width:519px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%209.png"/></a></figure><ul id="55b02196-539f-4ae8-ae45-04382b6f2010" class="bulleted-list"><li style="list-style-type:circle">위 Figure 3에서 이상한 그림들이 보이는 것은, hyperplane 근처의 일반적인 사례가 아니라, normal direction의 방향으로 latent code를 infinite하게 보낸 경우임.</li></ul></li></ul><p id="3f87c843-fb6e-435a-8d7c-b9d47e394013" class=""> </p><h2 id="8a23ed1e-6819-4424-951e-b3173de108a2" class="">3-2. Latent Space Manipulation</h2><ul id="b3875fad-098f-4a16-8e03-d130325b9411" class="bulleted-list"><li style="list-style-type:disc">Pose 등에서 interpolation한것처럼 각 방향을 잘 학습한 것을 확인할 수 있고, 데이터 상에서 안보이는 각도도 represent할 수 있다는 것을 확인함.</li></ul><ul id="2e47405f-a14c-409a-8e54-c180ec4fe808" class="bulleted-list"><li style="list-style-type:disc">육안상 보이는 Bad result등과 그렇지 않은 result 등을 구별하는 hyperplane도 만들 수 있었고, 실제로 Bad result에서 멀어지는 방향으로 이동하면 좋은 결과들이 많이 나옴.</li></ul><h2 id="d7da719f-6f52-4f1d-b63e-32679c7a805f" class="">3-3. Conditional Manipulation</h2><h3 id="2293595d-24ca-4c27-b647-61cad2953ad0" class="">Correlation between Attributes</h3><ul id="fea48066-335c-4991-9c2d-a77d9f159b2c" class="bulleted-list"><li style="list-style-type:disc">Correlation을 확인하는 metrics으로 두가지를 사용.</li></ul><ol type="1" id="99d111c6-867e-4544-af7d-c89d67fc251d" class="numbered-list" start="1"><li>Cosine Similarity<figure id="21279e7e-9005-4a2f-9029-f54c45816325" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2010.png"><img style="width:164px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2010.png"/></a></figure><ul id="0a9be2a5-b287-4946-94ec-ba3d3e0f1de6" class="bulleted-list"><li style="list-style-type:disc">n1과 n2는 unit vector임.</li></ul></li></ol><ol type="1" id="45a6ed5c-fb81-4324-b4a6-b1a357778f1e" class="numbered-list" start="2"><li>Correlation coefficient<figure id="8b5f9823-aa72-45b4-88ba-f7a632456ebd" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2011.png"><img style="width:171px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2011.png"/></a></figure><figure id="6480928b-b0cc-4b36-b56b-6175fab94947" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2012.png"><img style="width:576px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2012.png"/></a></figure><ul id="a937b13e-729c-40c5-a569-2eb887b19f3d" class="bulleted-list"><li style="list-style-type:disc">Pose, Smile은 correlate가 잘 안되어있는데, Age, Gender, Eyeglasses는 상당히 Correlate 되어있음. 이는 Dataset의 분포 때문임.</li></ul></li></ol><figure id="7403b454-50d6-41c8-88fc-cd49ab4d25de" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2013.png"><img style="width:757px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2013.png"/></a></figure><ul id="e7556b19-06b7-4d50-966c-dd4c84da6f46" class="bulleted-list"><li style="list-style-type:disc">Figure 7.은 실제로 correlate 되어있는 feature들을 위의 Figure 2.  방법으로 manipulation한 결과임.</li></ul><h2 id="11834b2b-5927-4542-8209-74e4e4045dc9" class="">3-4. Results on Style GAN</h2><ul id="b1da5d32-0348-40e9-ae53-be196e6857dc" class="bulleted-list"><li style="list-style-type:disc">Style GAN은 앞에서 보여준 PGGAN의 예시와 다르게, z가 Generator로 들어가기 전에 W로 한번더 mapping되는 과정이 있음.</li></ul><ul id="0c5a28a5-bd8a-4444-8d9d-00718fa8e462" class="bulleted-list"><li style="list-style-type:disc">이 과정에서 disentangled representation이 더 강해짐.</li></ul><figure id="a63d2c2f-c9f5-4fe5-9e24-a8f2c2a54be8" class="image"><a href="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2014.png"><img style="width:872px" src="Interpreting%20the%20Latent%20Space%20of%20GANs%20for%20Semantic%205161bfc4ef0443ada8d95ff1702cf9e3/Untitled%2014.png"/></a></figure><ul id="21637011-ca11-4256-8cac-849f354e7a31" class="bulleted-list"><li style="list-style-type:disc">Figure 9.은 Style GAN에서 Age에 대해서 manipulation한 결과인데, Age와 eyeglasses는 크게 correlate되어있고, W space와 z space 각각을 보았을땐 W space의 manipulation결과가 더 좋은 것을 볼 수 있음. </li></ul><ul id="a83f95e2-8214-4ef4-9bf6-23f58a68bd69" class="bulleted-list"><li style="list-style-type:disc">마지막 row의 결과는 figure 2의 방법으로 z space에서 eyeglasses는 고정시키고 Age만 변경시킨 결과임. </li></ul><ul id="f3ad6b20-6036-4022-b61a-5bd542b82f05" class="bulleted-list"><li style="list-style-type:disc">위 Conditional Manipulation 실험을 W space에서 했을때는 결과가 좋지 않았는데, train Data의 age와 eyeglasses feature가 correlation이 높은 상황에서 z에서 W space로 mapping 될때 entanglement가 굉장히 강해져서 둘의 normal이 거의 동일한 방향이되고, 뺏을땐 거의 0이 되기 때문.</li></ul><h2 id="aec1db3c-65cc-479f-ae0e-b55e028569db" class="">3-5. Real Image Manipulation</h2><ul id="e5a4b53c-ddde-4ae1-86e6-7da24cb56b10" class="bulleted-list"><li style="list-style-type:disc">두가지 방향성 존재. <ul id="8e64ab88-07c6-4daa-b6ff-cb6291a3a84f" class="bulleted-list"><li style="list-style-type:circle">첫번째는 latent code를 generator에 넣고 나온 image를 실제 image와 pixel-wise reconstruction error을 계산해 optimization하는 방법. </li></ul><ul id="ec565988-de48-47ac-b579-8f7ffb9fb5e4" class="bulleted-list"><li style="list-style-type:circle">두번째는 image에서 latent space로 가는 inverse mapping을 하는 encoder를 추가로 학습하는 방법.</li></ul></li></ul><ul id="62e225ac-3b37-4a4e-b9f4-a210f83289ee" class="bulleted-list"><li style="list-style-type:disc">이미 학습되어있는 PGGAN 을 기반으로 했을땐 원하는 방향으로 feature가 manipulation 되기는 했지만, reconstruction quality가 좋지는 않았음. style GAN의 경우는 각 layer에 들어가는 w를 optimization target으로 삼았고, 실제 editing 시에 모든 style codes를 smae direction으로 push하여 좋은 성능을 보이는 것을 확인함.</li></ul><ul id="1f3fe559-0548-4b71-8ea3-a95bb0413597" class="bulleted-list"><li style="list-style-type:disc">encoder-decoder based generative model에서도 적용되는 것을 확인함.</li></ul><p id="8855d0d7-b998-4033-b374-24148c49ab39" class="">
+</p><h1 id="9e17de24-e1c6-4fb3-b0b9-aaa5c25bdf58" class="">4. Conclusion</h1><ul id="9962e3ba-c125-4e94-b63f-5771beb1acb2" class="bulleted-list"><li style="list-style-type:disc">GAN의 latent space에 encode된 semantics를 이해할 수 있었고, unconditional GAN을 controllable GAN으로 바꿀수도 있다는 것을 보임.</li></ul><ul id="72de13bb-5ace-41a4-9dbf-e874d69df1fd" class="bulleted-list"><li style="list-style-type:disc">또한 real Image에도 적용가능함을 보임.</li></ul></div></article></body></html>
